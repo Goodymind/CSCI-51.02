@@ -1,39 +1,67 @@
 #include <iostream>
 using namespace std;
+// useful tests:
+//      abcdefghijklmnopqrstuvwxyz
+//      ABCDEFGHIJKLMNOPQRSTUVWXYZ
+//      abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+//      1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()
 
-char changeCharacter(char* x) // takes in a character pointer x
+void incrementChar(char* cpointer)                                                      // function that accepts a reference to a character to be incremented
 {
-    *x += 1; // increments the value stored in the address which moves the letter by 1 for reasons explained in #4
-    return *x; // returns the character pointer (#5)
+
+    if ((*cpointer >= 65 && *cpointer < 90) || (*cpointer >= 97 && *cpointer < 122))    // if character is in [A-Ya-y]
+    {
+        (*cpointer) ++;                                                                 // increment to next character;
+    }
+    else if (*cpointer == 90)                                                           // if character is Z
+    {
+        *cpointer = 65;                                                                 // Z -> A
+    }
+    else if (*cpointer == 122)                                                          // if character is z
+    {
+        *cpointer = 97;                                                                 // z -> a;
+    }
 }
 
 int main(void)
 {
-    string name; // declaration of name variable to be used
+    string name; // declaration of name variable
 
-    cin >> name; // takes input, stores it in name (#1)
+    cin >> name; // (1) accept console input and store to name variable
 
-    cout << name << endl; // outputs the name inputted (#2)
+    cout << name << endl; // (2) print name value
 
-    char first_letter = name[0]; // stores first character of name in variable called first_letter
-    cout << first_letter; // outputs it first
-    for (int j = 1; j < name.length(); j++) // for the remaining length of name...
+    cout << name[0];                        // (3) print first letter;
+    for (int i = 1; i < name.length(); i++) // for loop that outputs # on the
     {
-        cout << "#"; // output a # sign (#3)
+        cout << "#"; // remaining number of letters
     }
-    cout << endl;
+    cout << endl; // finish the line.
 
-    for (int k = 0; k < name.length(); k++) // for every letter in name...
+    for (int i = 0; i < name.length(); i++) // (4) iterates through each character
     {
-        char current_character = name[k]; // takes the current character of the name
-        current_character++; // increments the character (because c++ stores characters just as 8bit integers) to "move" it one character, including keeping the capitalization
-        cout << current_character; // outputs the character (#4)
+        char c = name[i];                                // get current character
+        if ((c >= 65 && c < 90) || (c >= 97 && c < 122)) // if character is in [A-Ya-y]
+        {
+            c++; // increment to next character;
+        }
+        else if (c == 90) // if character is Z
+        {
+            c = 65; // Z -> A
+        }
+        else if (c == 122) // if character is z
+        {
+            c = 97; // z -> a;
+        }
+        cout << c;
     }
-    cout << endl;
+    cout << endl; // finish the name
 
-    for (int i = 0; i < name.length(); i++)
+    for (int i = 0; i < name.length(); i++) // (5) Does the same as number 4
     {
-        changeCharacter(&name[i]);
+        incrementChar(&name[i]);            // passes the reference of the character to the function.
     }
+
     cout << name << endl;
+    return 0;
 }
