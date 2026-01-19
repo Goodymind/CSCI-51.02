@@ -23,7 +23,6 @@ int main(){
 
         // Print the agent's coordinates
         cout << "Agent #" << i << " is at (" << x << ", " << y << ")" << endl;
-
-        return 0;
     }
+    return 0;
 }
