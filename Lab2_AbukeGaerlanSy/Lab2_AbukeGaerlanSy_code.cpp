@@ -23,7 +23,6 @@ int main(void)
     cin >> n;
     for (int i = 1; i <= n; i++)
     {
-        string line;
 
         cin >> x >> y;
         getline(cin >> ws, message);
