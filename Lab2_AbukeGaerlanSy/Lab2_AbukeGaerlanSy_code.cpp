@@ -3,6 +3,24 @@
 #include <stdlib.h>
 using namespace std;
 
+void rstrip(string* s) 
+{
+    int trimsize = 0;
+    for (int i = (*s).length() - 1; i >= 0; i--)
+    {
+        if ((*s)[i] == 32) 
+        {
+            trimsize++;
+        }
+        else 
+        {
+            break;
+        }
+    }
+    (*s).resize((*s).length() - trimsize);
+    (*s).shrink_to_fit();
+}
+
 int parseMessage(string msgp)
 {
     for (int i = 0; i < msgp.length(); i++)             // iterates through every character.
@@ -33,6 +51,7 @@ int main(void)
         
         if (m == 0)                                                             // if nondigit message
         {
+            rstrip(&message);
             cout << "Agent #" << i << " yells: \"" << message << "\"" << endl;  // output  message
         }
         else
