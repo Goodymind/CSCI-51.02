@@ -1,28 +1,45 @@
-#include <iostream>
-#include <string>
+#include <iostream>     
+#include <string>       
+#include <stdlib.h>     
+#include <stdio.h>      
 
 using namespace std;
 
-int main(){
-    
-    int N;      // number of agents
-    cin >> N;   // Read the first line: number of agents
-
-    //process agents
+int main(void)
+{
+    int N;
+    cin >> N;   // number of agents
 
     for (int i = 1; i <= N; i++)
     {
-        int x, y;         // agent coordinates
-        string message;   // message after X and Y
+        int x, y;
+        string message;
 
-        // Read the X and Y coordinates
-        cin >> x >> y;
+        cin >> x >> y;          // read coordinates
+        
+        getline(cin, message);  // read message 
 
-        // Read the rest of the line as the message
-        getline(cin, message);
-
-        // Print the agent's coordinates
         cout << "Agent #" << i << " is at (" << x << ", " << y << ")" << endl;
+
+        // convert message to integer
+        int num = atoi(message.c_str());
+
+        // convert integer back to string
+        char numStr[20];
+        snprintf(numStr, 20, "%d", num);
+
+        // check if message is exactly one integer
+        if (message == numStr)
+        {
+            cout << "Agent #" << i << " holds up the number: "
+                 << num << endl;
+        }
+        else
+        {
+            cout << "Agent #" << i << " yells: \""
+                 << message << "\"" << endl;
+        }
     }
+
     return 0;
 }
