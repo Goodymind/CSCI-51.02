@@ -6,7 +6,7 @@ using namespace std;
 void rstrip(string* s) 
 {
     int trimsize = 0;
-    for (int i = (*s).length() - 1; i >= 0; i--)
+    for (int i = s->length() - 1; i >= 0; i--)
     {
         if ((*s)[i] == 32 || (*s)[i] == 9 || (*s)[i] == 10 || (*s)[i] == 11 || (*s)[i] == 12 || (*s)[i] == 13) 
         {
@@ -17,8 +17,8 @@ void rstrip(string* s)
             break;
         }
     }
-    (*s).resize((*s).length() - trimsize);
-    (*s).shrink_to_fit();
+    s->resize(s->length() - trimsize);
+    s->shrink_to_fit();
 }
 
 int parseMessage(string msgp)
