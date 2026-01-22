@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stdio.h>
-#include <stdlib.h>
+// #include <stdlib.h>
 using namespace std;
 
 void rstrip(string* s) 
@@ -21,17 +21,29 @@ void rstrip(string* s)
     s->shrink_to_fit();                     // reduces the string's capacity to its new reduced size.
 }
 
-int parseMessage(string msgp)
+bool parseMessage(string* msgp, int* output)        // function that returns true if the string is an integer, stores the result in output
 {
-    for (int i = 0; i < msgp.length(); i++)             // iterates through every character.
+    bool negative = false;                          // true when we detect a -
+    bool digits_in = false;                         // true when we detect numbers
+    for (int i = 0; i < msgp->length(); i++)        // iterate through each character
     {
-        if (!isdigit(msgp[i]))                          // checks if the character is a digit
+        char c = (*msgp)[i];                        // get ith character
+        if (isdigit(c)) {                           // if character is a digit:
+            digits_in = true;                       //      We are now going through the digits
+        }
+        else if (c == '-' && !digits_in)            // if character is a bar and we haven't detected any numbers before         
+        {   
+            negative = true;                        //      set negative flag to true
+            digits_in = true;                       //      next characters should be digits
+        }
+        else                                        // if not a bar or a digit
         {
-            return 0;                                   // returns 0 immediately if nondigit detected.
+            output = nullptr;                       // return false and null output.
+            return false;
         }
     }
-
-    return atoi(msgp.c_str());
+    (*output) = stoi(*msgp);                        // after validating, return the integer
+    return true;                                    // parseMessage = true;
 }
 
 int main(void)
@@ -47,11 +59,11 @@ int main(void)
 
         cout << "Agent #" << i << " is at (" << x << "," << y << ")" << endl;   // output coordinates of Agent #i
         
-        int m = parseMessage(message);                                          // custom function;
+        int m = 0;                                    
+        rstrip(&message);                                                   // custom function that removes trailing whitespaces 
         
-        if (m == 0)                                                             // if nondigit message
+        if (!parseMessage(&message, &m))                 // if nondigit message
         {
-            rstrip(&message);                                                   // custom function that removes trailing whitespaces 
             cout << "Agent #" << i << " yells: \"" << message << "\"" << endl;  // output  message
         }
         else
