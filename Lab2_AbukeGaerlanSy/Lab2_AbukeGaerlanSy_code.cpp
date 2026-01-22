@@ -31,10 +31,10 @@ bool parseMessage(string* msgp, int* output)        // function that returns tru
         if (isdigit(c)) {                           // if character is a digit:
             digits_in = true;                       //      We are now going through the digits
         }
-        else if (c == '-' && !digits_in)            // if character is a bar and we haven't detected any numbers before         
+        else if (c == '-' && !digits_in && !negative)// if character is a bar and we haven't detected any numbers or bars before         
         {   
-            negative = true;                        //      set negative flag to true
-            digits_in = true;                       //      next characters should be digits
+            negative = true;                        //      set negative flag 
+                                                    //      next characters should be digits
         }
         else                                        // if not a bar or a digit
         {
@@ -42,6 +42,13 @@ bool parseMessage(string* msgp, int* output)        // function that returns tru
             return false;
         }
     }
+    
+    if (!digits_in)                                 // if we never found any digits
+    {
+        output = nullptr;                           // return false
+        return false;
+    }
+
     (*output) = stoi(*msgp);                        // after validating, return the integer
     return true;                                    // parseMessage = true;
 }
