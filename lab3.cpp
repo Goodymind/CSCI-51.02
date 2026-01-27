@@ -4,14 +4,14 @@ using namespace std;
 struct IntNode
 {                         // linked list with basic operations
     int data;             // integer calue
-    IntNode *next = NULL; // next node
-    IntNode *previous = NULL;
+    IntNode* next = NULL; // next node
+    IntNode* previous = NULL;
 };
 
 struct IntList
 {
-    IntNode *first; // pointer to first node
-    IntNode *last;  // pointer to last node
+    IntNode* first; // pointer to first node
+    IntNode* last;  // pointer to last node
 
     IntList()
     {                 // constructors
@@ -20,9 +20,9 @@ struct IntList
     }
 
     // 2A create 1st node
-    IntNode *createFirstNode(int value)
+    IntNode* createFirstNode(int value)
     {
-        IntNode *newNode = new IntNode; // allocate new node
+        IntNode* newNode = new IntNode; // allocate new node
         newNode->data = value;          // set data
         newNode->next = NULL;           // no next one yet
 
@@ -32,12 +32,12 @@ struct IntList
     }
 
     // 2B insert after a node
-    IntNode *insertAfter(IntNode *prevNode, int value)
+    IntNode* insertAfter(IntNode* prevNode, int value)
     {
-        IntNode *newNode = new IntNode;
+        IntNode* newNode = new IntNode;
         newNode->data = value;
 
-        IntNode *nextNode = prevNode->next;
+        IntNode* nextNode = prevNode->next;
 
         prevNode->next = newNode;
         newNode->previous = prevNode;
@@ -52,19 +52,19 @@ struct IntList
     }
 
     // 2C get 1st node
-    IntNode *getFirst()
+    IntNode* getFirst()
     {
         return first; // return 1st pointer
     }
 
     // 2D get next node
-    IntNode *getNext(IntNode *currentNode)
+    IntNode* getNext(IntNode* currentNode)
     {
         return currentNode->next; // return next node
     }
 
     // 2E delete a node
-    void deleteNode(IntNode *currentNode)
+    void deleteNode(IntNode* currentNode)
     {
         IntNode* prevNode = currentNode->previous;
         IntNode* nextNode = currentNode->next;
@@ -75,15 +75,15 @@ struct IntList
     }
 
     // helper function to easily add nodes
-    IntNode *add(int value)
+    IntNode* add(int value)
     {
         if (first == NULL)
         {
-            IntNode *node = this->createFirstNode(value);
+            IntNode* node = this->createFirstNode(value);
             return node;
         }
 
-        IntNode *node = this->insertAfter(last, value);
+        IntNode* node = this->insertAfter(last, value);
         last = node;
         return node;
     }
@@ -92,10 +92,10 @@ struct IntList
 
     ~IntList()
     {                             // destructor
-        IntNode *current = first; // start at first
+        IntNode* current = first; // start at first
         while (current != NULL)
         {                                  // while nodes exist
-            IntNode *next = current->next; // aave next
+            IntNode* next = current->next; // aave next
             delete current;                // free current
             current = next;                // move to next
         }
@@ -105,29 +105,81 @@ struct IntList
 struct IntStack
 {
 
-    // constructor
-    // pop
-    // push
-    // size
+    int size;
+    IntNode* top = NULL;
+
+    IntStack()
+    {
+        size = 0;
+    }
+
+    void push(int i)
+    {
+        IntNode* node = new IntNode();
+        node->data = i;
+        size++;
+        if (top == NULL)
+        {
+            top = node;
+            return;
+        }
+
+        top->next = node;
+        node->previous = top;
+        top = node;
+    }
+
+    int pop()
+    {
+
+        if (top == NULL || size == 0)
+        {
+            throw runtime_error("Popping an Empty Stack!");
+        }
+
+        int output = top->data;
+
+        IntNode* trash = top;
+        top = top->previous;
+        delete trash;
+        trash = NULL;
+        return output;
+    }
+
+    int currentSize()
+    {
+        return size;
+    }
 };
 
 int main()
 {
 
-    IntList *myList = new IntList();
+    // IntList* myList = new IntList();
 
-    IntNode *firstnode = myList->createFirstNode(5);
-    IntNode *one = myList->add(1);
-    IntNode *two = myList->add(2);
-    IntNode *three = myList->add(3);
-    IntNode *four = myList->add(4);
+    // IntNode* firstnode = myList->createFirstNode(5);
+    // IntNode* one = myList->add(1);
+    // IntNode* two = myList->add(2);
+    // IntNode* three = myList->add(3);
+    // IntNode* four = myList->add(4);
 
-    cout << "data of firstnode->next: " << myList->getNext(firstnode)->data << endl;
-    cout << "first->data:" << myList->first->data << endl;
-    cout << "last->data" << myList->last->data << endl;
-    cout << "two->next->data" << myList->getNext(two)->data << endl;
-    cout << "deleting node two" << endl;
-    myList->deleteNode(two);
-    cout << "one->next->data" << myList->getNext(one)->data << endl;
-    delete myList;
+    // cout << "data of firstnode->next: " << myList->getNext(firstnode)->data << endl;
+    // cout << "first->data:" << myList->first->data << endl;
+    // cout << "last->data" << myList->last->data << endl;
+    // cout << "two->next->data" << myList->getNext(two)->data << endl;
+    // cout << "deleting node two" << endl;
+    // myList->deleteNode(two);
+    // cout << "one->next->data" << myList->getNext(one)->data << endl;
+    // delete myList;
+
+    IntStack* stack = new IntStack();
+    stack->push(2);
+    stack->push(4);
+    stack->push(6);
+    cout << stack->currentSize() << endl;
+    cout << stack->pop() << endl;
+    cout << stack->pop() << endl;
+    cout << stack->pop() << endl;
+    // cout << stack->pop() << endl; //throws an error when popping an empty stack
+    delete stack;
 }
