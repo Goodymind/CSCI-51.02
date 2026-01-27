@@ -45,9 +45,11 @@ struct IntList{
     }
 
     // 2E delete a node
-	//IntNode* deleteNode(IntNode* node){
-		//delete IntNode* node;
-	//}
+	IntNode* deleteNode(IntNode* node){
+        //delete IntNode node;
+        //node = NULL;
+        return 0;
+	}
 
     // 2F display list
 
@@ -81,6 +83,10 @@ struct IntStack{
 
 int main(){
 
-    IntList myList;
+    IntList myList; 
+
+    myList.createFirstNode(8);
+    cout << myList.first->data << endl;
+
 
 }
