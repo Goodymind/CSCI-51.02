@@ -150,6 +150,17 @@ struct IntStack
     {
         return size;
     }
+
+    ~IntStack()
+    {
+        while (top != NULL)
+        {
+            IntNode* trash = top;
+            top = top->previous;
+            delete trash;
+            trash = NULL;
+        }
+    }
 };
 
 int main()
@@ -179,7 +190,7 @@ int main()
     cout << stack->currentSize() << endl;
     cout << stack->pop() << endl;
     cout << stack->pop() << endl;
-    cout << stack->pop() << endl;
+    // cout << stack->pop() << endl;
     // cout << stack->pop() << endl; //throws an error when popping an empty stack
     delete stack;
 }
