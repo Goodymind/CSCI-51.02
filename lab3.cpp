@@ -166,22 +166,22 @@ struct IntStack
 int main()
 {
 
-    // IntList* myList = new IntList();
+    IntList* myList = new IntList();
 
-    // IntNode* firstnode = myList->createFirstNode(5);
-    // IntNode* one = myList->add(1);
-    // IntNode* two = myList->add(2);
-    // IntNode* three = myList->add(3);
-    // IntNode* four = myList->add(4);
+    IntNode* firstnode = myList->createFirstNode(5);
+    IntNode* one = myList->add(1);
+    IntNode* two = myList->add(2);
+    IntNode* three = myList->add(3);
+    IntNode* four = myList->add(4);
 
-    // cout << "data of firstnode->next: " << myList->getNext(firstnode)->data << endl;
-    // cout << "first->data:" << myList->first->data << endl;
-    // cout << "last->data" << myList->last->data << endl;
-    // cout << "two->next->data" << myList->getNext(two)->data << endl;
-    // cout << "deleting node two" << endl;
-    // myList->deleteNode(two);
-    // cout << "one->next->data" << myList->getNext(one)->data << endl;
-    // delete myList;
+    cout << "data of firstnode->next: " << myList->getNext(firstnode)->data << endl;
+    cout << "first->data:" << myList->first->data << endl;
+    cout << "last->data" << myList->last->data << endl;
+    cout << "two->next->data" << myList->getNext(two)->data << endl;
+    cout << "deleting node two" << endl;
+    myList->deleteNode(two);
+    cout << "one->next->data" << myList->getNext(one)->data << endl;
+    delete myList;
 
     IntStack* stack = new IntStack();
     stack->push(2);
