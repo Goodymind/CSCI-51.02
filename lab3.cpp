@@ -142,6 +142,7 @@ struct IntStack
         top = top->previous;                // reassign top node
         delete trash;                       // delete trash
         trash = NULL;                       // make pointer null
+        size--;
         return output;                      // returns recently popped data
     }
 
@@ -167,6 +168,7 @@ int main()
 
     IntList* myList = new IntList();
 
+    cout << "first node null?: " << (myList->getFirst() == NULL) << endl;
     IntNode* firstnode = myList->createFirstNode(5);
     IntNode* one = myList->add(1);
     IntNode* two = myList->add(2);
@@ -174,14 +176,16 @@ int main()
     IntNode* four = myList->add(4);
 
     cout << "data of firstnode->next: " << myList->getNext(firstnode)->data << endl;
-    cout << "first->data:" << myList->first->data << endl;
+    cout << "first->data:" << myList->getFirst()->data << endl;
     cout << "last->data" << myList->last->data << endl;
     cout << "two->next->data" << myList->getNext(two)->data << endl;
     cout << "deleting node two" << endl;
     myList->deleteNode(two);
     cout << "one->next->data" << myList->getNext(one)->data << endl;
-    myList->insertAfter(one, 9);
-    cout << "check inserted data: " << myList->getNext(one)->data << endl;;
+    IntNode* inserted = myList->insertAfter(one, 9);
+    cout << "check inserted data: " << myList->getNext(one)->data << endl;
+    cout << "check inserted next data: " << myList->getNext(inserted)->data << endl;
+    cout << "check null: " << (myList->getNext(four) == NULL) << endl; 
     delete myList;
 
     IntStack* stack = new IntStack();
@@ -191,6 +195,7 @@ int main()
     cout << stack->currentSize() << endl;
     cout << stack->pop() << endl;
     cout << stack->pop() << endl;
+    cout << stack->currentSize() << endl;
     // cout << stack->pop() << endl;
     // cout << stack->pop() << endl; //throws an error when popping an empty stack
     delete stack;
