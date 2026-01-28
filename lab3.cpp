@@ -77,16 +77,16 @@ struct IntList
     // helper function to easily add nodes
     IntNode* add(int value)
     {
-        if (first == NULL)
+        if (first == NULL)                                      // if list is empty
         {
-            IntNode* node = this->createFirstNode(value);
+            IntNode* node = this->createFirstNode(value);       // create first node 
             return node;
         }
 
-        IntNode* node = this->insertAfter(last, value);
-        last = node;
-        return node;
-    }
+        IntNode* node = this->insertAfter(last, value);         // make node and insert after last node
+        last = node;                                            // set pointer to last node
+        return node;                                            
+    }   
 
     // 2F display list
 
