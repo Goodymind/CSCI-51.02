@@ -3,7 +3,7 @@ using namespace std;
 
 struct IntNode
 {                         // linked list with basic operations
-    int data;             // integer calue
+    int data;             // integer value
     IntNode* next = NULL; // next node
     IntNode* previous = NULL;
 };
@@ -34,18 +34,18 @@ struct IntList
     // 2B insert after a node
     IntNode* insertAfter(IntNode* prevNode, int value)
     {
-        IntNode* newNode = new IntNode;
-        newNode->data = value;
+        IntNode* newNode = new IntNode;         // allocate new node
+        newNode->data = value;                  // store value
 
-        IntNode* nextNode = prevNode->next;
+        IntNode* nextNode = prevNode->next;     // set address node to previous node's 'next node' pointer
 
-        prevNode->next = newNode;
-        newNode->previous = prevNode;
+        prevNode->next = newNode;               // set node after previous node
+        newNode->previous = prevNode;           // set this node's previous node to the previous node
 
-        if (nextNode != NULL)
+        if (nextNode != NULL)                   // if next node is the last node in list
         {
-            newNode->next = nextNode;
-            nextNode->previous = newNode;
+            newNode->next = nextNode;           // set next node 
+            nextNode->previous = newNode;       // set the pointer back to previous node
         }
 
         return newNode;
@@ -64,14 +64,14 @@ struct IntList
     }
 
     // 2E delete a node
-    void deleteNode(IntNode* currentNode)
+    void deleteNode(IntNode* currentNode)          // when deleting node...
     {
-        IntNode* prevNode = currentNode->previous;
-        IntNode* nextNode = currentNode->next;
-        prevNode->next = nextNode;
+        IntNode* prevNode = currentNode->previous; // take address of previous node
+        IntNode* nextNode = currentNode->next;     // take address of next node
+        prevNode->next = nextNode;                 // connect previous and next node
         nextNode->previous = prevNode;
 
-        delete currentNode;
+        delete currentNode;                         
     }
 
     // helper function to easily add nodes
@@ -95,7 +95,7 @@ struct IntList
         IntNode* current = first; // start at first
         while (current != NULL)
         {                                  // while nodes exist
-            IntNode* next = current->next; // aave next
+            IntNode* next = current->next; // have next
             delete current;                // free current
             current = next;                // move to next
         }
@@ -104,61 +104,60 @@ struct IntList
 
 struct IntStack
 {
-
-    int size;
-    IntNode* top = NULL;
+    private: IntNode* top = NULL;   // setting top of stack as null
+    public: int size;               // setting size variable
 
     IntStack()
     {
-        size = 0;
+        size = 0;   // stacks start empty
     }
 
     void push(int i)
     {
-        IntNode* node = new IntNode();
-        node->data = i;
-        size++;
+        IntNode* node = new IntNode();  // make new node
+        node->data = i;                 // store data i 
+        size++;                         // update size
         if (top == NULL)
-        {
-            top = node;
+        {                               // if stack is empty
+            top = node;                 // assign node to top
             return;
         }
 
-        top->next = node;
-        node->previous = top;
-        top = node;
+        top->next = node;               // update next to newly pushed node
+        node->previous = top;           // set pointer 
+        top = node;                     // new top node
     }
 
     int pop()
     {
 
-        if (top == NULL || size == 0)
+        if (top == NULL || size == 0)       // runtime error if popping empty stack
         {
             throw runtime_error("Popping an Empty Stack!");
         }
 
-        int output = top->data;
+        int output = top->data;             // stores topmost data
 
-        IntNode* trash = top;
-        top = top->previous;
-        delete trash;
-        trash = NULL;
-        return output;
+        IntNode* trash = top;               // set topmost node as trash
+        top = top->previous;                // reassign top node
+        delete trash;                       // delete trash
+        trash = NULL;                       // make pointer null
+        return output;                      // returns recently popped data
     }
 
     int currentSize()
     {
-        return size;
+        return size;        
     }
 
     ~IntStack()
     {
-        while (top != NULL)
+        while (top != NULL)         // while stack has data
         {
-            IntNode* trash = top;
-            top = top->previous;
-            delete trash;
-            trash = NULL;
+            IntNode* trash = top;   // set top node to trash
+            top = top->previous;    // reassign top
+            delete trash;           // delete trash
+            trash = NULL;           // make pointer null
         }
     }
 };
@@ -181,6 +180,8 @@ int main()
     cout << "deleting node two" << endl;
     myList->deleteNode(two);
     cout << "one->next->data" << myList->getNext(one)->data << endl;
+    myList->insertAfter(one, 9);
+    cout << "check inserted data: " << myList->getNext(one)->data << endl;;
     delete myList;
 
     IntStack* stack = new IntStack();
