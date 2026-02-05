@@ -188,6 +188,17 @@ int main()
     cout << "check null: " << (myList->getNext(four) == NULL) << endl; 
     delete myList;
 
+    IntNode* current = myList->getFirst();
+    for (int i = 0; i < 5; i++)
+    {
+        cout << current->data << endl;
+        current = myList->getNext(current);
+
+        if (current == NULL) {
+            break;
+        }
+    }
+
     IntStack* stack = new IntStack();
     stack->push(2);
     stack->push(4);
@@ -196,7 +207,9 @@ int main()
     cout << stack->pop() << endl;
     cout << stack->pop() << endl;
     cout << stack->currentSize() << endl;
-    // cout << stack->pop() << endl;
+    cout << stack->pop() << endl;
+
+    
     // cout << stack->pop() << endl; //throws an error when popping an empty stack
-    delete stack;
+    // delete stack;
 }
