@@ -6,19 +6,41 @@ _Z11multiplyByXP8IntArrayi:
 .LFB0:
 	.cfi_startproc
 	endbr64
-	cmpl	$0, (%rdi)
-	jle	.L1
-	movl	$0, %eax
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movq	%rdi, -24(%rbp)
+	movl	%esi, -28(%rbp)
+	movl	$0, -4(%rbp)
+	jmp	.L2
 .L3:
-	movq	8(%rdi), %rdx
-	leaq	(%rdx,%rax,4), %rdx
-	movl	%esi, %ecx
-	imull	(%rdx), %ecx
-	movl	%ecx, (%rdx)
-	addq	$1, %rax
-	cmpl	%eax, (%rdi)
-	jg	.L3
-.L1:
+	movq	-24(%rbp), %rax
+	movq	8(%rax), %rax
+	movl	-4(%rbp), %edx
+	movslq	%edx, %rdx
+	salq	$2, %rdx
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movq	-24(%rbp), %rdx
+	movq	8(%rdx), %rdx
+	movl	-4(%rbp), %ecx
+	movslq	%ecx, %rcx
+	salq	$2, %rcx
+	addq	%rcx, %rdx
+	imull	-28(%rbp), %eax
+	movl	%eax, (%rdx)
+	addl	$1, -4(%rbp)
+.L2:
+	movq	-24(%rbp), %rax
+	movl	(%rax), %eax
+	cmpl	%eax, -4(%rbp)
+	jl	.L3
+	nop
+	nop
+	popq	%rbp
+	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
 .LFE0:
