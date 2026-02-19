@@ -1,6 +1,6 @@
 #include "IntArray.h"
  
-void multiplyByX(IntArray *p) 
+void multiplyBy61(IntArray *p) 
 { 
     for (int i = 0; i < p->size; i++)
     {

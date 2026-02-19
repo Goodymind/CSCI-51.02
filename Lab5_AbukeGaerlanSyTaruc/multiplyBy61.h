@@ -1,15 +1,14 @@
- .file "multiplyB61.cpp"
+ .file multiplyB61.cpp
  .text
  .globl _Z12multiplyBy61P8IntArray
  .type _Z12multiplyBy61P8IntArray, @function
-_Z12multiplyBy61P8IntArray:
+_Z11multiplyByXP8IntArray:
 .LFB0:
  .cfi_startproc
  endbr64
- cmpl $0, (%rdi)
+ cmpl	$0, (%rdi)
  jle .L1
  movl $0, %eax
-.L3:
  movq 8(%rdi), %rdx
  leaq (%rdx,%rax,4), %rdx
  imull $61, (%rdx), %ecx
@@ -21,9 +20,9 @@ _Z12multiplyBy61P8IntArray:
  ret
  .cfi_endproc
 LFE0:
- .size _Z12multiplyBy61P8IntArray, .-_Z12multiplyBy61P8IntArray
+ .size _Z11multiplyByXP8IntArray, .-_Z11multiplyByXP8IntArray
  .ident "GCC: (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0"
- .section .note.GNU-stack,"",@progbits
+ .section note.GNU-stack,"",@progbits
  .section .note.gnu.property,"a"
  .align 8
  .long 1f - 0f
