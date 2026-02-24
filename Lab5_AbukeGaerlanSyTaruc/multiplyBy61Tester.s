@@ -12,24 +12,11 @@ _Z12multiplyBy61P8IntArray:
 .L3:
  movq 8(%rdi), %rdx
  leaq (%rdx,%rax,4), %rdx
- movl (%rdx), %ecx
- movl $0, %r8d
- movl %ecx, %r9d
- shll $5, %r9d
- addl %r9d, %r8d
- movl %ecx, %r9d
- shll $4, %r9d
- addl %r9d, %r8d
- movl %ecx, %r9d
- shll $3, %r9d
- addl %r9d, %r8d
- movl %ecx, %r9d
- shll $2, %r9d
- addl %r9d, %r8d
- movl %r8d, (%rdx)
- addl $1, %eax
- cmpl (%rdi), %eax
- jl .L3
+ imull $61, (%rdx), %ecx
+ movl %ecx, (%rdx)
+ addq $1, %rax
+ cmpl %eax, (%rdi)
+ jg .L3
 .L1:
  ret
  .cfi_endproc
