@@ -18,13 +18,6 @@ def optimize(n):
 
         p = floor(log2(latest))
         b = 2 ** p
-
-
-        # if latest is a power of 2
-        if b == latest:
-            print(next)
-            break
-
         a = b - 1
         c = b + 1
 
@@ -32,14 +25,26 @@ def optimize(n):
         blist = copy(next)
         clist = copy(next)
 
-        alist[-1] = a
+        alist[-1] = (2, p, -1)
         alist.append(latest - a)
-        blist[-1] = b
+        blist[-1] = (2, p)
         blist.append(latest - b)
-        clist[-1] = c
+        clist[-1] = (2, p, 1)
         clist.append(latest - c)
+
+        if b == latest:
+            print(blist)
+            return
+    
+        if a == latest:
+            print(alist)
+            return
+
+        if c == latest:
+            print(clist)
+            return
 
         queue.append(blist)
         queue.append(alist)
         queue.append(clist)
-optimize(21) 
+optimize(65) 
