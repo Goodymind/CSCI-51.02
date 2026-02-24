@@ -1,12 +1,63 @@
 #include <iostream>
+#include <vector>
+#include <queue>
+#include <cmath>
 #include "IntArray.h"
 
 using namespace std;
+
+vector<int> optimize(int n)
+{
+    if (n == 0 || n == 1)
+        return {n};
+
+    queue<vector<int>> q;
+    q.push({n});
+
+    while (!q.empty())
+    {
+        vector<int> current = q.front();
+        q.pop();
+
+        int latest = current.back();
+
+        int p = floor(log2(latest));
+        int b = 1 << p;   
+
+        if (b == latest)
+            return current;
+
+        int a = b - 1;
+        int c = b + 1;
+
+        vector<int> alist = current;
+        vector<int> blist = current;
+        vector<int> clist = current;
+
+        alist.back() = a;
+        alist.push_back(latest - a);
+
+        blist.back() = b;
+        blist.push_back(latest - b);
+
+        clist.back() = c;
+        clist.push_back(latest - c);
+
+        q.push(blist);
+        q.push(alist);
+        q.push(clist);
+    }
+
+    return {};
+}
+
 
 
 int main(int argc, char* argv[]) 
 {
     int x = stoi(argv[1]);
+
+    vector<int> binary = optimize(x);
     // headers
     cout << " .file" << " \"multiplyB" << x << ".cpp\"" << endl;
     cout << " .text" << endl;
@@ -30,11 +81,24 @@ int main(int argc, char* argv[])
     cout << " leaq (%rdx,%rax,4), %rdx" <<  endl;
     // TODO
     // UPDATE THIS TO NOT USE IMULL
-    cout << " imull $" << x << ", (%rdx), %ecx" <<  endl;
-    cout << " movl %ecx, (%rdx)" <<  endl;
-    cout << " addq $1, %rax" <<  endl;
-    cout << " cmpl %eax, (%rdi)" <<  endl;
-    cout << " jg .L3" <<  endl;
+    cout << " movl (%rdx), %ecx" << endl;
+    cout << " movl $0, %r8d" << endl;
+
+    for (int value : binary)
+    {
+        int shift = log2(value);
+
+        cout << " movl %ecx, %r9d" << endl;
+        cout << " shll $" << shift << ", %r9d" << endl;
+        cout << " addl %r9d, %r8d" << endl;
+    }
+
+    cout << " movl %r8d, (%rdx)" << endl;
+
+    // INCREMENT THROUGH VECTOR
+    cout << " addl $1, %eax" << endl;
+    cout << " cmpl (%rdi), %eax" << endl;
+    cout << " jl .L3" << endl;
 
     //L1
     cout << ".L1:" << endl;
