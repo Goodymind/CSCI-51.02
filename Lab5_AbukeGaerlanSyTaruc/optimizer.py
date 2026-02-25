@@ -2,49 +2,18 @@ from collections import deque
 from math import log2, floor
 from copy import copy
 
-def optimize(n):
-    if n == 1 or n == 0:
-        print(0)
-        return
-    
-    queue = deque()
-    queue.append([n])
-    
-    # breadth first search approach that checks each instance of 2^n + (-1, 0, 1)
-    while queue:
-        next = queue.popleft()
-        
-        latest = next[-1]
+# taken from wikipedia
+# https://en.wikipedia.org/wiki/Non-adjacent_form
+# Introduced by G. W. Reit
+# faster way by Prodinger
+def optimize(x):
+    e = bin(x)[2:0]
+    xh = x >> 1
+    x3 = x + xh
+    c = xh ^ x3
+    np = x3 & c
+    nm = xh & c
+    print(bin(np))
+    print(bin(nm))
 
-        p = floor(log2(latest))
-        b = 2 ** p
-        a = b - 1
-        c = b + 1
-
-        alist = next
-        blist = copy(next)
-        clist = copy(next)
-
-        alist[-1] = (2, p, -1)
-        alist.append(latest - a)
-        blist[-1] = (2, p)
-        blist.append(latest - b)
-        clist[-1] = (2, p, 1)
-        clist.append(latest - c)
-
-        if b == latest:
-            print(blist)
-            return
-    
-        if a == latest:
-            print(alist)
-            return
-
-        if c == latest:
-            print(clist)
-            return
-
-        queue.append(blist)
-        queue.append(alist)
-        queue.append(clist)
-optimize(65) 
+optimize(6) 
