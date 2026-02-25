@@ -30,7 +30,7 @@ int main()
     cout << arr->elements[3] << endl;
     cout << arr->elements[4] << endl;
 
-    delete arr->elements;
+    delete[] arr->elements;
     arr->elements = NULL;
 
     delete arr;
