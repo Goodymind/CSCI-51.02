@@ -1,12 +1,80 @@
 #include <iostream>
 #include "IntArray.h"
+#include <array>
 #include <vector>
-#include <queue>
-#include <cmath>
+#include <bitset>
 
 using namespace std;
 
+// output is in reverse order
+vector<int> decToBin(int x)
+{
+    int i = 0;
+    vector<int> result;
+    while (x > 0)
+    {
+        result.push_back(x % 2);
+        x = x / 2;
+        i++;
+    }
+    return result;
+}
 
+// returns a vector of non adjacent form of an integer
+// Introduced by G. W. Reit
+// faster way by Prodinger
+// used here, https://oeis.org/A184616
+array<vector<int>, 2> naf(int x)
+{
+    int xh = x >> 1;
+    int x3 = x + xh;
+    int c = xh ^ x3;
+    int np = x3 & c;
+    int nm = xh & c;
+    
+    array<vector<int>, 2> result;
+    result[0] = decToBin(np);
+    result[1] = decToBin(nm);
+
+    return result;
+}
+
+void multiply(int x)
+{
+    auto result = naf(x);
+
+    // since binary is stored in reverse order
+    // value = np[i] * (2 ** i)
+    // value = 1 * (2 ** 5) = np[i] * 32
+    // np contains the positive bits of naf
+    auto np = result[0];
+    // nm contains the negative bits of naf
+    auto nm = result[1];
+
+    for (int i = 0; i < np.size(); i++)
+    {
+        if (np[i] == 1)
+        {
+            // TODO
+            // cout movl
+            // cout shift
+            // cout add
+            // cout movl
+        }
+    }
+
+    for (int i = 0; i < nm.size(); i++)
+    {
+        if (np[i] == 1)
+        {
+            // TODO
+            // cout movl
+            // cout shift
+            // cout sub
+            // cout movl
+        }
+    }
+}
 
 int main(int argc, char* argv[]) 
 {
