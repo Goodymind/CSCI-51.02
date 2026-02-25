@@ -17,6 +17,13 @@ vector<int> decToBin(int x)
         x = x / 2;
         i++;
     }
+    // // cout << "binary (reverse): ";
+    // for (int i = 0; i < result.size(); i++)
+    // {
+    //     cout << result[i];
+    // }
+    // cout << endl;
+    
     return result;
 }
 
@@ -51,31 +58,51 @@ void multiply(int x)
     // nm contains the negative bits of naf
     auto nm = result[1];
 
+    // move the original value of x to ebx;
+    cout << " movl (%rdx), %ebx" << endl;
+    // ecx = 0; ecx is the accumulator
+    cout << " movl $0, %ecx" << endl;
+    // we save how many times eb has been shifted so afr
+    int current_ebx_shift = 0;
+
     for (int i = 0; i < np.size(); i++)
     {
         if (np[i] == 1)
         {
-            // TODO
-            // cout movl
-            // cout shift
-            // cout add
-            // cout movl
+            // shift original value by i, unless i = 0, then 
+            // we don't shift and we just add
+            if (i != 0)
+            {
+                cout << " shl $" << i - current_ebx_shift << ", %ebx" << endl;
+            }
+
+            // add x * (2 ** i) to the accumulator
+            cout << " addl %ebx, %ecx" << endl;
+
+            // update the current ebx shift
+            current_ebx_shift = i;
         }
     }
+    // reset eax back to original unshifted value
+    cout << " movl (%rdx), %ebx" << endl;
+    current_ebx_shift = 0;
 
     for (int i = 0; i < nm.size(); i++)
     {
-        if (np[i] == 1)
+        if (nm[i] == 1)
         {
-            // TODO
-            // cout movl
-            // cout shift
-            // cout sub
-            // cout movl
+            if (i != 0)
+            {
+                cout << " shl $" << i - current_ebx_shift << ", %ebx" << endl;
+            }
+
+            cout << " subl %ebx, %ecx" << endl;
+            current_ebx_shift = i;
         }
     }
 }
 
+// remove temp_ to enable tester
 int main(int argc, char* argv[]) 
 {
     int x = stoi(argv[1]);
@@ -102,7 +129,8 @@ int main(int argc, char* argv[])
     cout << " leaq (%rdx,%rax,4), %rdx" <<  endl;
     // TODO
     // UPDATE THIS TO NOT USE IMULL
-    cout << " imull $" << x << ", (%rdx), %ecx" <<  endl;
+    // cout << " imull $" << x << ", (%rdx), %ecx" <<  endl;
+    multiply(x);
     cout << " movl %ecx, (%rdx)" <<  endl;
     cout << " addq $1, %rax" <<  endl;
     cout << " cmpl %eax, (%rdi)" <<  endl;

@@ -12,7 +12,14 @@ _Z12multiplyBy61P8IntArray:
 .L3:
  movq 8(%rdi), %rdx
  leaq (%rdx,%rax,4), %rdx
- imull $61, (%rdx), %ecx
+ movl (%rdx), %ebx
+ movl $0, %ecx
+ addl %ebx, %ecx
+ shl $6, %ebx
+ addl %ebx, %ecx
+ movl (%rdx), %ebx
+ shl $2, %ebx
+ subl %ebx, %ecx
  movl %ecx, (%rdx)
  addq $1, %rax
  cmpl %eax, (%rdi)
