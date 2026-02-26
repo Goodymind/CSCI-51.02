@@ -106,13 +106,24 @@ void multiply(int x)
 int main(int argc, char* argv[]) 
 {
     int x = stoi(argv[1]);
-    // headers
-    cout << " .file" << " \"multiplyB" << x << ".cpp\"" << endl;
-    cout << " .text" << endl;
-    cout << " .globl" << " _Z12multiplyBy" << x << "P8IntArray" << endl;
-    cout << " .type" << " _Z12multiplyBy"<< x << "P8IntArray, @function" << endl;
-    cout << "_Z12multiplyBy" << x << "P8IntArray:" << endl;
-    
+
+    if (x >= 0)
+    {
+        // headers
+        cout << " .file" << " \"multiplyBy" << x << ".cpp\"" << endl;
+        cout << " .text" << endl;
+        cout << " .globl" << " _Z12multiplyBy" << x << "P8IntArray" << endl;
+        cout << " .type" << " _Z12multiplyBy"<< x << "P8IntArray, @function" << endl;
+        cout << "_Z12multiplyBy" << x << "P8IntArray:" << endl;
+    }
+    else
+    {
+        cout << " .file" << " \"multiplyByn" << -x << ".cpp\"" << endl;
+        cout << " .text" << endl;
+        cout << " .globl" << " _Z12multiplyByn" << -x << "P8IntArray" << endl;
+        cout << " .type" << " _Z12multiplyByn"<< -x << "P8IntArray, @function" << endl;
+        cout << "_Z12multiplyByn" << -x << "P8IntArray:" << endl;
+    }
     // LFB0
     cout << ".LFB0:" << endl;
     cout << " .cfi_startproc" << endl;
@@ -145,7 +156,15 @@ int main(int argc, char* argv[])
     // Stuff below is unrelated to main program but stuff the pc needs
     //LFEO
     cout << "LFE0:" << endl;
-    cout << " .size _Z12multiplyBy"<< x <<"P8IntArray, .-_Z12multiplyBy" << x <<"P8IntArray" << endl;
+    if (x >= 0)
+    {
+        cout << " .size _Z12multiplyBy"<< x <<"P8IntArray, .-_Z12multiplyBy" << x <<"P8IntArray" << endl;
+    }
+    else
+    {
+        cout << " .size _Z12multiplyByn"<< -x <<"P8IntArray, .-_Z12multiplyByn" << -x <<"P8IntArray" << endl;
+
+    }
     cout << " .ident \"GCC: (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0\"" << endl;
     cout << " .section .note.GNU-stack,\"\",@progbits" << endl;
     cout << " .section .note.gnu.property,\"a\"" << endl;
