@@ -1,5 +1,5 @@
 #!/bin/bash
-export input=$1
+input=$1
 current_user=$USER
 char_length=${#current_user}
 
