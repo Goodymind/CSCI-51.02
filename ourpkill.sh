@@ -1,13 +1,21 @@
 #!/bin/bash
+#source "ourpgrep.sh"
 
-if [ $# -ne 1 ]; 
-then
-    echo "Error. Give only 1 process name."
-    exit 1
+# input="$@"
+
+option=$1
+command=$2
+
+if [ -n "$command" ]; then
+    signal=$option
+    pattern=$command
+else
+    # default signal -15
+    signal=-15
+    pattern=$option
 fi
 
-# save process name
-PROCESS_NAME="$1"
-
-# get current user's name
-CURRENT_USER="$USER"
+for pid in $(./ourpgrep.sh "$pattern")
+do
+    kill $signal $pid
+done
