@@ -1,13 +1,11 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; 
-then
-    echo "Error. Give only 1 process name."
-    exit 1
+input=$1
+current_user=$USER
+char_length=${#current_user}
+
+if [ -n "$input" ]; then
+	ps aux | grep "$current_user" | grep "$input" | grep -v grep | cut -c "$((char_length+10))"-"$((char_length+14))"
+else
+	echo "Please input a program name to search"
 fi
-
-# save process name
-PROCESS_NAME="$1"
-
-# get current user's name
-CURRENT_USER="$USER"
