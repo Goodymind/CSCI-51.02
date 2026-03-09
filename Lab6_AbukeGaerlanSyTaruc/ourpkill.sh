@@ -15,7 +15,8 @@ else
     pattern=$option
 fi
 
-for pid in $(./ourpgrep.sh "$pattern")
+pids=$(./ourpgrep.sh "$pattern")
+for pid in $pids
 do
     kill $signal $pid >/dev/null
 done
