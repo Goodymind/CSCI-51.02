@@ -17,6 +17,5 @@ fi
 
 for pid in $(./ourpgrep.sh "$pattern")
 do
-    kill $signal $pid
-    exit 1
+    kill $signal $pid >/dev/null
 done
