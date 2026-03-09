@@ -3,16 +3,10 @@
 
 using namespace std;
 
-extern void multiplyByX(IntArray *p, int x); 
-
+extern void multiplyBy90(IntArray *p); 
+ 
 int main() 
 { 
-    // - create a new IntArray with your own elements 
-    //   (don't forget to properly allocate/deallocate the memory!) 
-    // - print it out 
-    // - multiply it by a number of your choosing via multiplyByX() 
-    // - print the result 
-
     IntArray* arr = new IntArray;
     arr->size = 5;
     arr->elements = new int[5];
@@ -28,7 +22,7 @@ int main()
     cout << arr->elements[3] << endl;
     cout << arr->elements[4] << endl;
 
-    multiplyByX(arr, 5);
+    multiplyBy90(arr);
 
     cout << arr->elements[0] << endl;
     cout << arr->elements[1] << endl;
