@@ -11,7 +11,7 @@ if [ -z "$option" ]; then
     exit 1
 fi
 
-if [[ "$option" == -[0-9]* ]]; then
+if [[ "$option" = -[0-9]* ]]; then
     signal=$option
     pattern=$command
 else
