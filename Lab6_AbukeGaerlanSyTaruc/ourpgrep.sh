@@ -2,10 +2,11 @@
 
 input=$1
 current_user=$USER
-char_length=${#current_user}
+# char_length=${#current_user}
 
 if [ -n "$input" ]; then
 	ps aux | grep "$current_user" | grep -w "$input" | grep -v grep | grep -v kill | awk '{print $2}'
 else
-	echo "Please input a program name to search"
+	echo "Please input a program name to search" >&2
+	exit 1
 fi
