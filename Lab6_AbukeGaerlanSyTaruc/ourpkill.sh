@@ -11,13 +11,19 @@ if [ -z "$option" ]; then
     exit 1
 fi
 
-if [ -n "$command" ]; then
+if [[ "$option" == -[0-9]* ]]; then
     signal=$option
     pattern=$command
 else
     # default signal -15
     signal=-15
     pattern=$option
+fi
+
+if [ -z "$pattern" ]
+then
+    echo "Error: Please provide a pattern" >&2
+    exit 1
 fi
 
 pids=$(./ourpgrep.sh "$pattern")
