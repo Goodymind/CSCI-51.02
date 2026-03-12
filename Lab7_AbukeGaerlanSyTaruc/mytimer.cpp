@@ -10,7 +10,12 @@
 // zero padding
 #include <iomanip>
 
+// signals
+#include <csignal>
+
 using namespace std;
+
+
 
 void printTime()
 {
@@ -29,6 +34,30 @@ void printTime()
 
 int main(int argc, char const *argv[])
 {
+    pid_t parent = getpid();
+    
+    pid_t xclockpid = fork();
+
+    if (xclockpid == 0)
+    {
+        // alinus     22464  0.0  0.0  11300  7680 pts/5    S+   20:54   0:00 myXclock
+        execl("/usr/bin/xclock", "myXclock", NULL);
+        // no need to return cuz the child process image was replaced
+    }
+
+    pid_t listener = fork();
+
+    if (listener == 0)
+    {
+        string res;
+        getline(cin, res);
+        // Terminal ENTER
+        cout << "\"Terminated\"\n";
+        kill(parent, SIGINT);
+        kill(xclockpid, SIGINT);
+        exit(1);
+    }
+
     // keeps track of how many print outs up to 3;
     int counter = 0;
     while(true)
@@ -40,7 +69,7 @@ int main(int argc, char const *argv[])
             counter = 0;
             cout << "\"This program has gone on for far too long. Close the myXclock window or press Enter on this window to exit.\"\n";
         }
-        sleep(3);
+        sleep(1);
     }
 }
 
