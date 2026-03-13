@@ -132,4 +132,10 @@ int main(int argc, char const *argv[])
     sleep
 
     https://www.geeksforgeeks.org/cpp/sleep-function-in-cpp/
+
+    
+    signal handling
+    
+    https://web.stanford.edu/class/archive/cs/cs110/cs110.1214/static/lectures/cs110-lecture-07-signals-w21.pdf
+
 */
