@@ -10,12 +10,37 @@
 // zero padding
 #include <iomanip>
 
-// signals
+// signals, atexit
 #include <csignal>
+
+// waitpid
+#include <sys/wait.h>
 
 using namespace std;
 
+pid_t parent;
+pid_t xclockpid;
+pid_t listener;
+pid_t group_pid;
+bool dying = false;
 
+void signalHandler(int sig) 
+{
+    if (!dying)
+    {
+        dying = true;
+        kill(-abs(group_pid), sig);
+    }
+    exit(0);
+}
+
+void atexit_handler()
+{
+    if (getpid() == parent)
+    {
+        cout << "\"Terminated\"\n";
+    }
+}
 
 void printTime()
 {
@@ -34,9 +59,23 @@ void printTime()
 
 int main(int argc, char const *argv[])
 {
-    pid_t parent = getpid();
+    // ctrl c command
+    signal(SIGINT, signalHandler);
+
+    signal(SIGKILL, signalHandler);
     
-    pid_t xclockpid = fork();
+    // kill command from console
+    signal(SIGTERM, signalHandler);
+
+    signal(SIGABRT, signalHandler);
+
+    parent = getpid();
+
+    group_pid = getpgid(parent);
+    
+    xclockpid = fork();
+
+    setpgid(xclockpid, group_pid);
 
     if (xclockpid == 0)
     {
@@ -45,23 +84,28 @@ int main(int argc, char const *argv[])
         // no need to return cuz the child process image was replaced
     }
 
-    pid_t listener = fork();
+    listener = fork();
+
+    setpgid(xclockpid, group_pid);
 
     if (listener == 0)
     {
         string res;
         getline(cin, res);
         // Terminal ENTER
-        cout << "\"Terminated\"\n";
-        kill(parent, SIGINT);
-        kill(xclockpid, SIGINT);
+        raise(SIGINT);
         exit(1);
     }
 
+
+    atexit(atexit_handler);
+    signal(SIGCHLD, signalHandler);
+    
     // keeps track of how many print outs up to 3;
     int counter = 0;
     while(true)
     {
+        sleep(1);
         printTime();
         counter++;
         if (counter == 3)
@@ -69,7 +113,6 @@ int main(int argc, char const *argv[])
             counter = 0;
             cout << "\"This program has gone on for far too long. Close the myXclock window or press Enter on this window to exit.\"\n";
         }
-        sleep(1);
     }
 }
 
