@@ -86,7 +86,7 @@ int main(int argc, char const *argv[])
 
     listener = fork();
 
-    setpgid(xclockpid, group_pid);
+    setpgid(listener, group_pid);
 
     if (listener == 0)
     {
