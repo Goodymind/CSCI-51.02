@@ -63,7 +63,8 @@ void *monteCarloFunc(void *ptr) {
         {
             double long estimate = hits / i * 4;
             // a/(rr) = pi
-            synced_out << "Thread " << id << ": " << hits << " / " << i << "(estimate: " << estimate << ")" << endl;
+            synced_out << flush;
+            printf("Thread %ld: %Lg / %ld (estimate: %.18Lg)\n", id, hits, i, estimate);
         }
     }
     globalHits[id] = hits / n * 4;
@@ -125,7 +126,7 @@ int main(int argc, char *argv[]) {
         }
         
         finalPi = finalPi/threads;
-        cout << "Final result: " << finalPi << endl;
+        printf("Final result: %.18Lg\n", finalPi);
     
     return 0;
 }
