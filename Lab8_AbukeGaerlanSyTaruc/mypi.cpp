@@ -48,6 +48,8 @@ void *monteCarloFunc(void *ptr) {
     // memory cleanup, we don't need the struct at this point
     delete data;
 
+    // Source - https://stackoverflow.com/questions/70825787/how-does-stdosyncstream-manage-the-out-stream
+    // for flushing the output of a single thread
     std::osyncstream synced_out(cout); // synchronized wrapper for std::cout
 
     double long hits = 0;
@@ -81,7 +83,8 @@ int main(int argc, char *argv[]) {
     long p = atol(argv[3]);
 
     vector<pthread_t> thread_list(threads);
-    // fill with zeroes
+    // fill with zeroes for thread safety
+    // Source - https://stackoverflow.com/questions/20413675/stdvector-thread-safety-and-resize-options
     globalHits.resize(threads, 0);
 
     for (int t = 0; t < threads; t++)
