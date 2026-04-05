@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cstdlib>
-#include <ctime>
 #include <pthread.h>
 #include <vector>
 #include <random>
@@ -12,9 +11,6 @@ using namespace std;
 // long double globalHits[100];
 // changed to vector because I don't want to handle memory leaks -Linus
 vector<double long> globalHits;
-
-// Mutex to prevent threads from printing at the same time
-pthread_mutex_t printLock;
 
 // I'm gonna be honest, the only data we need to pass is threadId -Linus
 struct ThreadData {
@@ -114,12 +110,19 @@ int main(int argc, char *argv[]) {
         pthread_join(thread_list[t], NULL);
     }
 
-    // Do we average the pis?
+    // average PIs
     for (long t = 0; t < threads; t++)
     {
-        cout << "(FINAL) Thread " << t << ": " << globalHits[t] << endl;
+        cout << "Thread Average " << t << ": " << globalHits[t] << endl;
     }
-    
 
+        long double finalPi = 0;
+        for (long t = 0; t < threads; t++) {
+            finalPi += globalHits[t];
+        }
+        
+        finalPi = finalPi/threads;
+        cout << "Final result: " << finalPi << endl;
+    
     return 0;
 }
