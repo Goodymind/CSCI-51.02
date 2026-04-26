@@ -30,7 +30,7 @@
 
 int last_frame = -1;
 int skipped_frames = 0;
-
+int fps = 0;
 void readSharedMemory()
 {
     int shmId;
@@ -46,13 +46,19 @@ void readSharedMemory()
 
     else
     {
-        int m, n;
+        int m, n, pfps;
         memcpy(&m, sharedMem, sizeof(int));
         memcpy(&n, sharedMem + sizeof(int), sizeof(int));
+        memcpy(&pfps, sharedMem + sizeof(int) * 2, sizeof(int));
         char buffer[MAX_FRAME_SIZE];
-        strcpy(buffer, sharedMem + sizeof(int) * 2);
+        strcpy(buffer, sharedMem + sizeof(int) * 3);
         std::cout << buffer << std::endl;
         std::cout << "Current Frame: " << n << " / " << m;
+        if (fps == 0)
+        {
+            fps = pfps;
+        }
+        
         if (last_frame != -1)
         {
             if (n > last_frame + 1)
@@ -64,7 +70,7 @@ void readSharedMemory()
             last_frame = 0;
             skipped_frames = 0;
         }
-        std::cout << " (" << skipped_frames << " frames skipped)" << std::endl;
+        std::cout << " (" << skipped_frames << " frames skipped) " << std::endl;
     }
 }
 
@@ -123,7 +129,11 @@ void signalHandler(int signal)
 
 int main(int argc, char *argv[])
 {
-    int fps = atoi(argv[1]);
+    if (argc > 1)
+    {
+        fps = atoi(argv[1]);
+
+    }
 
     signal(SIGFPE, signalHandler);
     signal(SIGILL, signalHandler);
@@ -148,10 +158,10 @@ int main(int argc, char *argv[])
     }
 
     // main loop, as usual
-    int interval = 1000 / fps;
+
     while (true)
     {
         trySharedMemory();
-        std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
     }
 }

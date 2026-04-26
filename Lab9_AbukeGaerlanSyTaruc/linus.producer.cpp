@@ -35,7 +35,7 @@ struct frame
     std::string data;
 };
 
-void writeSharedMemory(frame *frame, int m, int n)
+void writeSharedMemory(frame *frame, int m, int n, int fps)
 {
     int shmId;
     int shmFlags = IPC_CREAT | 0666;
@@ -53,12 +53,13 @@ void writeSharedMemory(frame *frame, int m, int n)
     {
         memcpy(sharedMem, &m, sizeof(int));
         memcpy(sharedMem + sizeof(int), &n, sizeof(int));
+        memcpy(sharedMem + sizeof(int) * 2, &fps, sizeof(int));
         const char *buffer = frame->data.c_str();
-        strcpy(sharedMem + sizeof(int) * 2, buffer);
+        strcpy(sharedMem + sizeof(int) * 3, buffer);
     }
 }
 
-void trySharedMemory(frame *frame, int m, int n)
+void trySharedMemory(frame *frame, int m, int n, int fps)
 {
     // -- Sempahore get
     int nSems = 1; // number of processes that can access shared memory at the same time (right?)
@@ -83,7 +84,7 @@ void trySharedMemory(frame *frame, int m, int n)
     int opResult = semop(semId, sema, nOperations);
     if (opResult != -1)
     {
-        writeSharedMemory(frame, m, n);
+        writeSharedMemory(frame, m, n, fps);
 
         // -- Semaphore release
         nOperations = 1;
@@ -230,7 +231,7 @@ int main(int argc, char const *argv[])
         {
             n++;
             auto nextFrame = getFrame(file);
-            trySharedMemory(nextFrame, m, n);
+            trySharedMemory(nextFrame, m, n, fps);
             delete nextFrame;
 
             if (file.tellg() == length)
