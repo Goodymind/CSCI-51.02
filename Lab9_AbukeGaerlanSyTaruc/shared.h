@@ -18,4 +18,7 @@ struct SharedMemory {
     long frameCount;
 };
 
+// semaphore indices (we use 2 semaphores in the set)
+#define MUTEX 0  // controls exclusive access to shared mem
+
 #endif

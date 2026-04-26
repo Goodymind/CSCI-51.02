@@ -5,14 +5,19 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <cstdlib> // for exit()
+#include <algorithm> // for min()
 #include <atomic>
-#include <pthread.h>
+#include <thread>
 #include "shared.h"
 
 using namespace std;
 
 // based off of shm_example.cpp
 
+atomic<bool> running(true);
+
+// waits for enter then kills the loop
 void enterListener(){
     getchar();
     running = false;
@@ -22,11 +27,13 @@ int main( int argc, char* argv[] )
 {
     // Id for the shared memory
     int shmId;
+    int semId;
     SharedMemory* sharedMem;
 
-    shmId = shmget(SHM_KEY, sizeof(SharedMemory), 0666);
-    semId = shmget(SEM_KEY, 0, 0666);
-    if(shmId == -1 | semId == -1) {
+    // attach to existing shared mem + semaphores (producer should already be running)
+    shmId = shmget(SHM_KEY, 0, 0666);
+    semId = semget(SEM_KEY, 0, 0666);
+    if(shmId == -1 || semId == -1) {
         perror ("shmget failed - producer probs dead");
         exit(1);
     }
@@ -46,28 +53,32 @@ int main( int argc, char* argv[] )
     thread listener(enterListener);
 
     while(running) {
-        struct sembuffer sema[2];
+         // acquire mutex
+        // wait-for-zero then increment: standard System V mutex pattern
+        // both ops are atomic together via semop, so no race between them
+        // source: https://man7.org/linux/man-pages/man2/semop.2.html
+        struct sembuf sema[2];
         sema[0].sem_num = MUTEX;
-        sema[0].sem_op = 0;
-        sema[0].sem_flag = SEM_UNDO;
+        sema[0].sem_op = 0; // wait until semaphore == 0 (free)
+        sema[0].sem_flg = SEM_UNDO;
 
         sema[1].sem_num = MUTEX;
-        sema[1].sem_op = 1;
-        sema[1].sem_flag = SEM_UNDO | IPC_NOWAIT;
+        sema[1].sem_op = 1; // lock: increment to 1
+        sema[1].sem_flg = SEM_UNDO | IPC_NOWAIT;
 
-        semop(semId, sema, 2)
+        semop(semId, sema, 2);
 
-        // read + update shared memory
+        // critical section: read shared mem
         char localBuffer[MAX_FRAME_SIZE];
         memcpy(localBuffer, sharedMem->frameData, sharedMem->frameSize);
-        localBuffer[sharedmem->frameSize] = '\0';
+        localBuffer[sharedMem->frameSize] = '\0';
         long currentFrame = sharedMem->currentFrame;
         long frameCount = sharedMem->frameCount;
 
-        struct sembuffer release[1]; // release mutex
+        struct sembuf release[1]; // release mutex
         release[0].sem_num = MUTEX;
-        release[0].sem_op = -1;
-        release[0].sem_flag = SEM_UNDO | IPC_NOWAIT;
+        release[0].sem_op = -1; //unlock: decrement back to 0
+        release[0].sem_flg = SEM_UNDO | IPC_NOWAIT;
 
         semop(semId, release, 1);
 
@@ -78,6 +89,8 @@ int main( int argc, char* argv[] )
 
         lastFrame = currentFrame;
     }
+
+    listener.join();  // waits for the listener thread to finish cleanly before the program exits.
 
     // TODO: cleanup
 }
