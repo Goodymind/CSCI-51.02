@@ -35,6 +35,7 @@ struct frame
     std::string data;
 };
 
+// write a frame's string data into shared memory
 void writeSharedMemory(frame *frame)
 {
     int shmId;
@@ -55,6 +56,7 @@ void writeSharedMemory(frame *frame)
     }
 }
 
+// acquire semaphore, write frame, release - skips write if can't get lock
 void trySharedMemory(frame *frame)
 {
     // -- Sempahore get
@@ -96,6 +98,8 @@ void trySharedMemory(frame *frame)
     }
 }
 
+// scan ahead to figure out how many lines are in the next frame
+// (reads until the next ESC+c delimiter)
 int getFrameHeight(std::ifstream &file)
 {
     auto linePosition = file.tellg();
@@ -127,6 +131,7 @@ int getFrameHeight(std::ifstream &file)
     return end - start;
 }
 
+// read one full frame from the file (calls getFrameHeight internally so it reads twice)
 frame *getFrame(std::ifstream &file)
 {
     // I'm reading twice;

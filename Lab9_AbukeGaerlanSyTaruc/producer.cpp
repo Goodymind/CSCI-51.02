@@ -12,8 +12,10 @@
 
 // based off sem_sample.cpp
 
-atomic<bool> running(true); // for enter listener
+atomic<bool> running(true); // need atomic so the listener thread can safely flip this
+                            // source: https://stackoverflow.com/questions/9200951/ 
 
+// waits for enter then sets running to false                    
 void enterListener(){
     getchar() // TODO: make it tomorrow
     running = false;
