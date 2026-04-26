@@ -29,19 +29,57 @@
 struct frame
 {
     int height;
-    std::string *data;
-
-    ~frame()
-    {
-        delete[] data;
-    }
+    std::string data;
 };
 
 void writeSharedMemory(frame *frame)
 {
-    for (size_t i = 0; i < frame->height; i++)
+    int shmId;
+    int shmFlags = IPC_CREAT | 0666;
+    char* sharedMem;
+    shmId = shmget(SHM_KEY, MAX_FRAME_SIZE, shmFlags);
+    sharedMem = (char*)shmat(shmId, NULL, 0);
+
+}
+
+void trySharedMemory(frame *frame)
+{
+    // -- Sempahore get
+    int nSems = 1; // number of processes that can access shared memory at the same time (right?)
+    int semFlag = IPC_CREAT | 0666;
+    int semId = semget(SEM_KEY, nSems, semFlag);
+
+    if (semId == -1)
     {
-        std::cout << frame->data[i] << std::endl;
+        perror("semget");
+        std::exit(1);
+    }
+    // -- Semaphore access
+    int nOperations = 2;
+    struct sembuf sema[nOperations];
+    sema[0].sem_num = 0;
+    sema[0].sem_op = 0; // wait if semaphore != 0
+    sema[0].sem_flg = SEM_UNDO;
+
+    sema[1].sem_num = 0;
+    sema[1].sem_op = 1; // increment semaphore by 1
+    sema[1].sem_flg = SEM_UNDO | IPC_NOWAIT;
+    int opResult = semop(semId, sema, nOperations);
+    if (opResult != -1)
+    {
+        writeSharedMemory(frame);
+
+        // -- Semaphore release
+        nOperations = 1;
+        sema[0].sem_num = 0;
+        sema[0].sem_op = -1; // decrement, return semaphore to 0
+        sema[0].sem_flg = SEM_UNDO | IPC_NOWAIT;
+
+        opResult = semop(semId, sema, nOperations);
+        if (opResult == -1)
+        {
+            perror("semop (decrement)");
+        }
     }
 }
 
@@ -76,21 +114,22 @@ int getFrameHeight(std::ifstream &file)
     return end - start;
 }
 
-frame* getFrame(std::ifstream &file)
+frame *getFrame(std::ifstream &file)
 {
     // I'm reading twice;
     int height = getFrameHeight(file);
-    std::string* data = new std::string[height];
-
+    std::string data;
+    std::string line;
     std::string start;
     std::getline(file, start);
-    data[0] = start.substr(2, start.length() - 2);
+    data = start.substr(2, start.length() - 2);
     for (int i = 1; i < height; i++)
     {
-        std::getline(file, data[i]);
+        std::getline(file, line);
+        data = data + "\n" + line;
     }
 
-    frame* output = new frame;
+    frame *output = new frame;
     output->data = data;
     output->height = height;
     return output;
@@ -126,13 +165,13 @@ int main(int argc, char const *argv[])
         while (true)
         {
             auto nextFrame = getFrame(file);
-            writeSharedMemory(nextFrame);
+            trySharedMemory(nextFrame);
             delete nextFrame;
 
             if (file.tellg() == file.end)
             {
                 file.seekg(0, file.beg);
-            }
+            }  
 
             // https://www.geeksforgeeks.org/cpp/how-to-sleep-for-milliseconds-in-cpp/
             std::this_thread::sleep_for(std::chrono::milliseconds(interval));
