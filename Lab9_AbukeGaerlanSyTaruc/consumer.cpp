@@ -5,8 +5,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <cstdlib>
-#include <algorithm>
+#include <cstdlib> // for exit()
+#include <algorithm> // for min()
 #include <atomic>
 #include <thread>
 #include "shared.h"
@@ -71,7 +71,8 @@ int main( int argc, char* argv[] )
         // clamp frameSize before copy to avoid overflowing localBuffer
         // if frameSize is somehow bigger than our buffer, we'd stomp memory
         // source: https://www.fromdev.com/2025/11/memcpy-buffer-overflow-prevention-best-practices.html
-        int safeSize = min(sharedMem->frameSize, MAX_FRAME_SIZE - 1);
+        int safeSize = min(sharedMem->frameSize, MAX_FRAME_SIZE - 1); //  clamps the copy size so it can never exceed the buffer.
+                                                                      // The -1 leaves room for the null terminator on the next line
         memcpy(localBuffer, sharedMem->frameData, safeSize);
         localBuffer[safeSize] = '\0';
 
@@ -95,7 +96,7 @@ int main( int argc, char* argv[] )
         lastFrame = currentFrame;
     }
 
-    listener.join();
+    listener.join(); // waits for the listener thread to finish cleanly before the program exits.
 
     // TODO: cleanup (shmdt, semctl IPC_RMID if we own it)
 }
