@@ -8,7 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "shared.h"
+// #include "shared.h"
+#define ESC_CHAR '\\'
 
 // global variables for cleanup
 int semId = -1;

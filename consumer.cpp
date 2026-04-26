@@ -7,11 +7,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "shared.h"
+using namespace std;
+
+ #define SEM_MUTEX 0
+// #include "shared.h"
 
 // global for cleanup
 int semId = -1;
 char* sharedMem = NULL;
+
 
 // wait for semaphore == 0, then increment to 1 (lock)
 void acquireMutex( int semId )
