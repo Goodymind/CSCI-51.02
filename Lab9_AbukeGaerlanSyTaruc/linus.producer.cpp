@@ -28,13 +28,13 @@
 // strcpy
 #include <cstring>
 
-// might include this to shared.h later
 struct frame
 {
     int height;
     std::string data;
 };
 
+// m is total video frames, n is current frame
 void writeSharedMemory(frame *frame, int m, int n, int fps)
 {
     int shmId;
@@ -50,19 +50,19 @@ void writeSharedMemory(frame *frame, int m, int n, int fps)
     }
 
     else
-    {
-        memcpy(sharedMem, &m, sizeof(int));
-        memcpy(sharedMem + sizeof(int), &n, sizeof(int));
+    { 
+        memcpy(sharedMem, &m, sizeof(int));                         // dynamically allocating shared contiguous memory
+        memcpy(sharedMem + sizeof(int), &n, sizeof(int));           
         memcpy(sharedMem + sizeof(int) * 2, &fps, sizeof(int));
         const char *buffer = frame->data.c_str();
-        strcpy(sharedMem + sizeof(int) * 3, buffer);
+        strcpy(sharedMem + sizeof(int) * 3, buffer);                // storing frame data at the end of 3 ints
     }
 }
 
 void trySharedMemory(frame *frame, int m, int n, int fps)
 {
     // -- Sempahore get
-    int nSems = 1; // number of processes that can access shared memory at the same time (right?)
+    int nSems = 1; 
     int semFlag = IPC_CREAT | 0666;
     int semId = semget(SEM_KEY, nSems, semFlag);
 

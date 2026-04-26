@@ -50,13 +50,13 @@ void readSharedMemory()
         memcpy(&m, sharedMem, sizeof(int));
         memcpy(&n, sharedMem + sizeof(int), sizeof(int));
         memcpy(&pfps, sharedMem + sizeof(int) * 2, sizeof(int));
-        char buffer[MAX_FRAME_SIZE];
+        char buffer[MAX_FRAME_SIZE];    // read 1mb worth of frame data (upper limit from shared.h)
         strcpy(buffer, sharedMem + sizeof(int) * 3);
         std::cout << buffer << std::endl;
         std::cout << "Current Frame: " << n << " / " << m;
         if (fps == 0)
         {
-            fps = pfps;
+            fps = pfps; // set consumer fps to producer fps if 0
         }
         
         if (last_frame != -1)
@@ -77,7 +77,7 @@ void readSharedMemory()
 void trySharedMemory()
 {
     // -- Sempahore get
-    int nSems = 1; // number of processes that can access shared memory at the same time (right?)
+    int nSems = 1; 
     int semFlag = IPC_CREAT | 0666;
     int semId = semget(SEM_KEY, nSems, semFlag);
 
