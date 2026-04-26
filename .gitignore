@@ -42,3 +42,6 @@
 
 # playground
 playground.cpp
+sem_sample.cpp
+shm_sample.cpp
+.vscode
