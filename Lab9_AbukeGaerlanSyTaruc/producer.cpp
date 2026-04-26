@@ -9,7 +9,6 @@
 #include <pthread.h>
 #include "shared.h"
 
-using namespace std;
 
 // based off sem_sample.cpp
 

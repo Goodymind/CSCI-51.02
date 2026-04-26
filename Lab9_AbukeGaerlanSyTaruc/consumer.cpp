@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <atomic>
-#include <pthreads.h>
+#include <pthread.h>
 #include "shared.h"
 
 using namespace std;
