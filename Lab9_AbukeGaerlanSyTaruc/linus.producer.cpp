@@ -35,7 +35,7 @@ struct frame
     std::string data;
 };
 
-void writeSharedMemory(frame *frame)
+void writeSharedMemory(frame *frame, int m, int n)
 {
     int shmId;
     int shmFlags = IPC_CREAT | 0666;
@@ -46,16 +46,19 @@ void writeSharedMemory(frame *frame)
     if (((int *)sharedMem) == (int *)-1)
     {
         perror("shmop: shmat failed");
+        return;
     }
 
     else
     {
-        const char* buffer = frame->data.c_str();
-        strcpy(sharedMem, buffer);
+        memcpy(sharedMem, &m, sizeof(int));
+        memcpy(sharedMem + sizeof(int), &n, sizeof(int));
+        const char *buffer = frame->data.c_str();
+        strcpy(sharedMem + sizeof(int) * 2, buffer);
     }
 }
 
-void trySharedMemory(frame *frame)
+void trySharedMemory(frame *frame, int m, int n)
 {
     // -- Sempahore get
     int nSems = 1; // number of processes that can access shared memory at the same time (right?)
@@ -80,7 +83,7 @@ void trySharedMemory(frame *frame)
     int opResult = semop(semId, sema, nOperations);
     if (opResult != -1)
     {
-        writeSharedMemory(frame);
+        writeSharedMemory(frame, m, n);
 
         // -- Semaphore release
         nOperations = 1;
@@ -148,6 +151,35 @@ frame *getFrame(std::ifstream &file)
     return output;
 }
 
+int countVideoFrames(std::ifstream &file, int length)
+{
+    std::cout << "counting frames... ";
+    int frames = 0;
+    while (true)
+    {
+        getFrame(file);
+        frames++;
+        if (file.tellg() == length)
+        {
+            file.seekg(0, file.beg);
+            std::cout << frames << std::endl;
+            return frames;
+        }
+    }
+}
+
+pid_t grp;
+bool dying = false;
+void signalHandler(int signal)
+{
+    if (!dying)
+    {
+        kill(-abs(grp), signal);
+        dying = true;
+    }
+    exit(0);
+}
+
 int main(int argc, char const *argv[])
 {
     // args
@@ -155,14 +187,27 @@ int main(int argc, char const *argv[])
     int fps = atoi(argv[2]);
 
     // #5, listener process
+    signal(SIGFPE, signalHandler);
+    signal(SIGILL, signalHandler);
+    signal(SIGINT, signalHandler);
+    signal(SIGSEGV, signalHandler);
+    signal(SIGTERM, signalHandler);
+    signal(SIGQUIT, signalHandler);
+    signal(SIGCHLD, signalHandler);
+    signal(SIGSYS, signalHandler);
+    signal(SIGUSR1, signalHandler);
+
+    setpgid(0, 0);
+    grp = getpgid(getpid());
     pid_t producerPid = getpid();
     pid_t listener = fork();
     if (listener == 0)
     {
+        setpgid(getpid(), grp);
         std::string res;
         std::getline(std::cin, res);
         std::cout << "Listener received input: " << res << std::endl;
-        kill(producerPid, SIGINT);
+        kill(-grp, SIGTERM);
         exit(0);
     }
 
@@ -170,25 +215,34 @@ int main(int argc, char const *argv[])
     std::string line;
     std::ifstream file(fileName);
     int interval = 1000 / fps;
+    int m = -1;
+    int n = 0;
     if (file.is_open())
     {
         // For videos that may have same frames throughout
         // specs are so confusing
         // int height = getFrameHeight(file);
+        file.seekg(0, file.end);
+        int length = file.tellg();
+        file.seekg(0, file.beg);
+        m = countVideoFrames(file, length);
         while (true)
         {
+            n++;
             auto nextFrame = getFrame(file);
-            trySharedMemory(nextFrame);
+            trySharedMemory(nextFrame, m, n);
             delete nextFrame;
 
-            if (file.tellg() == file.end)
+            if (file.tellg() == length)
             {
                 file.seekg(0, file.beg);
+                n = 0;
             }
 
             // https://www.geeksforgeeks.org/cpp/how-to-sleep-for-milliseconds-in-cpp/
             std::this_thread::sleep_for(std::chrono::milliseconds(interval));
         }
+        file.close();
     }
 
     return 0;

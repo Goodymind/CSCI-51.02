@@ -43,9 +43,13 @@ void readSharedMemory()
 
     else
     {
+        int m, n;
+        memcpy(&m, sharedMem, sizeof(int));
+        memcpy(&n, sharedMem + sizeof(int), sizeof(int));
         char buffer[MAX_FRAME_SIZE];
-        strcpy(buffer, sharedMem);
+        strcpy(buffer, sharedMem + sizeof(int) * 2);
         std::cout << buffer << std::endl;
+        std::cout << "Current Frame: " << n << " / " << m << std::endl;
     }
 }
 
@@ -89,9 +93,32 @@ void trySharedMemory()
         }
     }
 }
-int main(int argc, char* argv[])
+
+pid_t grp;
+bool dying = false;
+void signalHandler(int signal)
+{
+    if (!dying)
+    {
+        kill(-abs(grp), signal);
+        dying = true;
+    }
+    exit(0);
+}
+
+int main(int argc, char *argv[])
 {
     int fps = atoi(argv[1]);
+
+    signal(SIGFPE, signalHandler);
+    signal(SIGILL, signalHandler);
+    signal(SIGINT, signalHandler);
+    signal(SIGSEGV, signalHandler);
+    signal(SIGTERM, signalHandler);
+    signal(SIGQUIT, signalHandler);
+    signal(SIGCHLD, signalHandler);
+    signal(SIGSYS, signalHandler);
+    signal(SIGUSR1, signalHandler);
 
     // #3, listener process
     pid_t sellerPid = getpid();
@@ -101,7 +128,7 @@ int main(int argc, char* argv[])
         std::string res;
         std::getline(std::cin, res);
         std::cout << "Listener received input: " << res << std::endl;
-        kill(sellerPid, SIGINT);
+        kill(-grp, SIGTERM);
         exit(0);
     }
 
@@ -112,5 +139,4 @@ int main(int argc, char* argv[])
         trySharedMemory();
         std::this_thread::sleep_for(std::chrono::milliseconds(interval));
     }
-
 }
