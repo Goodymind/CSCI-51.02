@@ -25,6 +25,9 @@
 #include <chrono>
 #include <thread>
 
+// strcpy
+#include <cstring>
+
 // might include this to shared.h later
 struct frame
 {
@@ -36,10 +39,20 @@ void writeSharedMemory(frame *frame)
 {
     int shmId;
     int shmFlags = IPC_CREAT | 0666;
-    char* sharedMem;
+    char *sharedMem;
     shmId = shmget(SHM_KEY, MAX_FRAME_SIZE, shmFlags);
-    sharedMem = (char*)shmat(shmId, NULL, 0);
+    sharedMem = (char *)shmat(shmId, NULL, 0);
 
+    if (((int *)sharedMem) == (int *)-1)
+    {
+        perror("shmop: shmat failed");
+    }
+
+    else
+    {
+        const char* buffer = frame->data.c_str();
+        strcpy(sharedMem, buffer);
+    }
 }
 
 void trySharedMemory(frame *frame)
@@ -171,7 +184,7 @@ int main(int argc, char const *argv[])
             if (file.tellg() == file.end)
             {
                 file.seekg(0, file.beg);
-            }  
+            }
 
             // https://www.geeksforgeeks.org/cpp/how-to-sleep-for-milliseconds-in-cpp/
             std::this_thread::sleep_for(std::chrono::milliseconds(interval));
