@@ -28,6 +28,9 @@
 // strcpy
 #include <cstring>
 
+int last_frame = -1;
+int skipped_frames = 0;
+
 void readSharedMemory()
 {
     int shmId;
@@ -49,7 +52,19 @@ void readSharedMemory()
         char buffer[MAX_FRAME_SIZE];
         strcpy(buffer, sharedMem + sizeof(int) * 2);
         std::cout << buffer << std::endl;
-        std::cout << "Current Frame: " << n << " / " << m << std::endl;
+        std::cout << "Current Frame: " << n << " / " << m;
+        if (last_frame != -1)
+        {
+            if (n > last_frame + 1)
+                skipped_frames += n - last_frame - 1;
+        }
+        last_frame = n;
+        if (n == 0)
+        {
+            last_frame = 0;
+            skipped_frames = 0;
+        }
+        std::cout << " (" << skipped_frames << " frames skipped)" << std::endl;
     }
 }
 
