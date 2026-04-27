@@ -35,6 +35,7 @@ struct frame
     std::string data;
 };
 
+// writes current frame + metadata (total frames, frame number, fps) into shared memory
 void writeSharedMemory(frame *frame, int m, int n, int fps)
 {
     int shmId;
@@ -59,6 +60,7 @@ void writeSharedMemory(frame *frame, int m, int n, int fps)
     }
 }
 
+// tries to acquire semaphore, write frame, then release — skips write if semaphore is busy
 void trySharedMemory(frame *frame, int m, int n, int fps)
 {
     // -- Sempahore get
@@ -79,7 +81,7 @@ void trySharedMemory(frame *frame, int m, int n, int fps)
     sema[0].sem_flg = SEM_UNDO;
 
     sema[1].sem_num = 0;
-    sema[1].sem_op = 1; // increment semaphore by 1
+    sema[1].sem_op = 1; // increment semaphore by 1; // lock
     sema[1].sem_flg = SEM_UNDO | IPC_NOWAIT;
     int opResult = semop(semId, sema, nOperations);
     if (opResult != -1)
@@ -89,7 +91,7 @@ void trySharedMemory(frame *frame, int m, int n, int fps)
         // -- Semaphore release
         nOperations = 1;
         sema[0].sem_num = 0;
-        sema[0].sem_op = -1; // decrement, return semaphore to 0
+        sema[0].sem_op = -1; // decrement, return semaphore to 0; unlock
         sema[0].sem_flg = SEM_UNDO | IPC_NOWAIT;
 
         opResult = semop(semId, sema, nOperations);
@@ -100,6 +102,7 @@ void trySharedMemory(frame *frame, int m, int n, int fps)
     }
 }
 
+// scans ahead to count lines in the next frame without moving the file cursor
 int getFrameHeight(std::ifstream &file)
 {
     auto linePosition = file.tellg();
@@ -111,7 +114,7 @@ int getFrameHeight(std::ifstream &file)
     {
         if (start == -1)
         {
-            if (line[0] == 27 && line[1] == 'c')
+            if (line[0] == 27 && line[1] == 'c') // ESC+c = frame delimiter
             {
                 start = height;
             }
@@ -127,10 +130,11 @@ int getFrameHeight(std::ifstream &file)
     }
     end = height;
     file.clear();
-    file.seekg(linePosition);
+    file.seekg(linePosition);   // put the cursor back where we found it
     return end - start;
 }
 
+// reads one full frame from the file (yes it reads twice because of getFrameHeight)
 frame *getFrame(std::ifstream &file)
 {
     // I'm reading twice;
@@ -139,7 +143,7 @@ frame *getFrame(std::ifstream &file)
     std::string line;
     std::string start;
     std::getline(file, start);
-    data = start.substr(2, start.length() - 2);
+    data = start.substr(2, start.length() - 2);     // strip the ESC+c prefix
     for (int i = 1; i < height; i++)
     {
         std::getline(file, line);
@@ -152,6 +156,7 @@ frame *getFrame(std::ifstream &file)
     return output;
 }
 
+// counts total frames in the video (runs once at startup)
 int countVideoFrames(std::ifstream &file, int length)
 {
     std::cout << "counting frames... ";
@@ -169,6 +174,7 @@ int countVideoFrames(std::ifstream &file, int length)
     }
 }
 
+// kills the whole process group on any fatal signal so nothing gets left hanging
 pid_t grp;
 bool dying = false;
 void signalHandler(int signal)
@@ -198,8 +204,11 @@ int main(int argc, char const *argv[])
     signal(SIGSYS, signalHandler);
     signal(SIGUSR1, signalHandler);
 
+    // put ourselves in our own process group so signalHandler can kill everyone cleanly
     setpgid(0, 0);
     grp = getpgid(getpid());
+
+    // fork a child that just waits for Enter, then kills the group
     pid_t producerPid = getpid();
     pid_t listener = fork();
     if (listener == 0)
@@ -223,6 +232,7 @@ int main(int argc, char const *argv[])
         // For videos that may have same frames throughout
         // specs are so confusing
         // int height = getFrameHeight(file);
+        // get file length so we know when we've hit the end
         file.seekg(0, file.end);
         int length = file.tellg();
         file.seekg(0, file.beg);
@@ -234,6 +244,7 @@ int main(int argc, char const *argv[])
             trySharedMemory(nextFrame, m, n, fps);
             delete nextFrame;
 
+            // loop back to start when video ends
             if (file.tellg() == length)
             {
                 file.seekg(0, file.beg);

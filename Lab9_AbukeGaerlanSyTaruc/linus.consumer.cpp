@@ -31,6 +31,9 @@
 int last_frame = -1;
 int skipped_frames = 0;
 int fps = 0;
+
+// reads frame + metadata from shared memory and prints it
+// also tracks skipped frames by comparing current frame number to last seen
 void readSharedMemory()
 {
     int shmId;
@@ -46,6 +49,7 @@ void readSharedMemory()
 
     else
     {
+        // read metadata from the front of shared memory (matches producer's write layout)
         int m, n, pfps;
         memcpy(&m, sharedMem, sizeof(int));
         memcpy(&n, sharedMem + sizeof(int), sizeof(int));
@@ -54,17 +58,22 @@ void readSharedMemory()
         strcpy(buffer, sharedMem + sizeof(int) * 3);
         std::cout << buffer << std::endl;
         std::cout << "Current Frame: " << n << " / " << m;
+       
+        // if fps=0 was passed, sync to producer's fps
         if (fps == 0)
         {
             fps = pfps;
         }
         
+        // count how many frames we missed since last read
         if (last_frame != -1)
         {
             if (n > last_frame + 1)
                 skipped_frames += n - last_frame - 1;
         }
         last_frame = n;
+
+        // reset counters when video loops
         if (n == 0)
         {
             last_frame = 0;
@@ -74,6 +83,7 @@ void readSharedMemory()
     }
 }
 
+// same semaphore pattern as producer — wait-for-zero then increment to lock, decrement to unlock
 void trySharedMemory()
 {
     // -- Sempahore get
@@ -94,7 +104,7 @@ void trySharedMemory()
     sema[0].sem_flg = SEM_UNDO;
 
     sema[1].sem_num = 0;
-    sema[1].sem_op = 1; // increment semaphore by 1
+    sema[1].sem_op = 1; // increment semaphore by 1; lock
     sema[1].sem_flg = SEM_UNDO | IPC_NOWAIT;
     int opResult = semop(semId, sema, nOperations);
     if (opResult != -1)
@@ -104,7 +114,7 @@ void trySharedMemory()
         // -- Semaphore release
         nOperations = 1;
         sema[0].sem_num = 0;
-        sema[0].sem_op = -1; // decrement, return semaphore to 0
+        sema[0].sem_op = -1; // decrement, return semaphore to 0; unlock
         sema[0].sem_flg = SEM_UNDO | IPC_NOWAIT;
 
         opResult = semop(semId, sema, nOperations);
@@ -115,6 +125,7 @@ void trySharedMemory()
     }
 }
 
+// same as producer — kill the whole group on exit
 pid_t grp;
 bool dying = false;
 void signalHandler(int signal)
@@ -129,6 +140,7 @@ void signalHandler(int signal)
 
 int main(int argc, char *argv[])
 {
+    // fps=0 means auto-sync to producer's rate (handled in readSharedMemory)
     if (argc > 1)
     {
         fps = atoi(argv[1]);
@@ -146,6 +158,7 @@ int main(int argc, char *argv[])
     signal(SIGUSR1, signalHandler);
 
     // #3, listener process
+    // fork a child that waits for Enter then kills the group
     pid_t sellerPid = getpid();
     pid_t listener = fork();
     if (listener == 0)
