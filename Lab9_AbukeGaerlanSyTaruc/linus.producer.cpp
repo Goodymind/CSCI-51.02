@@ -3,30 +3,38 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 
+
 // #include <stdio.h>
 // #include <stdlib.h>
+
 
 // strings and reading from terminal
 #include <string>
 #include <iostream>
 
+
 // shared variables
 #include "shared.h"
+
 
 // listener process
 #include <unistd.h>
 #include <csignal>
 
+
 // filereading
 // https://cplusplus.com/doc/tutorial/files/
 #include <fstream>
+
 
 // sleep for ms
 #include <chrono>
 #include <thread>
 
+
 // strcpy
 #include <cstring>
+
 
 // might include this to shared.h later
 struct frame
@@ -44,10 +52,12 @@ void writeSharedMemory(frame *frame)
     shmId = shmget(SHM_KEY, MAX_FRAME_SIZE, shmFlags);
     sharedMem = (char *)shmat(shmId, NULL, 0);
 
+
     if (((int *)sharedMem) == (int *)-1)
     {
         perror("shmop: shmat failed");
     }
+
 
     else
     {
@@ -64,6 +74,7 @@ void trySharedMemory(frame *frame)
     int semFlag = IPC_CREAT | 0666;
     int semId = semget(SEM_KEY, nSems, semFlag);
 
+
     if (semId == -1)
     {
         perror("semget");
@@ -76,6 +87,7 @@ void trySharedMemory(frame *frame)
     sema[0].sem_op = 0; // wait if semaphore != 0
     sema[0].sem_flg = SEM_UNDO;
 
+
     sema[1].sem_num = 0;
     sema[1].sem_op = 1; // increment semaphore by 1
     sema[1].sem_flg = SEM_UNDO | IPC_NOWAIT;
@@ -84,11 +96,13 @@ void trySharedMemory(frame *frame)
     {
         writeSharedMemory(frame);
 
+
         // -- Semaphore release
         nOperations = 1;
         sema[0].sem_num = 0;
         sema[0].sem_op = -1; // decrement, return semaphore to 0
         sema[0].sem_flg = SEM_UNDO | IPC_NOWAIT;
+
 
         opResult = semop(semId, sema, nOperations);
         if (opResult == -1)
@@ -147,17 +161,20 @@ frame *getFrame(std::ifstream &file)
         data = data + "\n" + line;
     }
 
+
     frame *output = new frame;
     output->data = data;
     output->height = height;
     return output;
 }
 
+
 int main(int argc, char const *argv[])
 {
     // args
     std::string fileName = argv[1];
     int fps = atoi(argv[2]);
+
 
     // #5, listener process
     pid_t producerPid = getpid();
@@ -170,6 +187,7 @@ int main(int argc, char const *argv[])
         kill(producerPid, SIGINT);
         exit(0);
     }
+
 
     // main loop
     std::string line;
@@ -186,15 +204,18 @@ int main(int argc, char const *argv[])
             trySharedMemory(nextFrame);
             delete nextFrame;
 
+
             if (file.tellg() == file.end)
             {
                 file.seekg(0, file.beg);
             }
 
+
             // https://www.geeksforgeeks.org/cpp/how-to-sleep-for-milliseconds-in-cpp/
             std::this_thread::sleep_for(std::chrono::milliseconds(interval));
         }
     }
+
 
     return 0;
 }
